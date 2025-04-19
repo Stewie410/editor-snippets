@@ -1,0 +1,8 @@
+{
+    "bang": {
+        "prefix": "#!",
+        "body": [
+            "#!/usr/bin/env ${1:interpreter}"
+        ]
+    }
+}

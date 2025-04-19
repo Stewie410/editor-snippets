@@ -1,0 +1,107 @@
+{
+    "directives": {
+        "prefix": "directives",
+        "body": [
+            "#SingleInstance Force",
+            "#Persistent",
+            "#NoEnv",
+            "#Warn",
+            "$0"
+        ]
+    },
+    "features": {
+        "prefix": "feats",
+        "body": [
+            "SetWorkingDir, %A_ScriptDir%",
+            "FileEncoding UTF-8",
+            "DetectHiddenWindows, On",
+            "DetectHiddentText, On",
+            "SendMode, Input",
+            "SetBatchLines, -1",
+            "SetWinDelay, -1",
+            "SetControlDelay, -1",
+            "$0"
+        ]
+    },
+    "autorun": {
+        "prefix": "auto",
+        "body": [
+            "$0",
+            "return"
+        ]
+    },
+    "key-exit": {
+        "prefix": "key-exit",
+        "body": [
+            "*Esc:ExitApp"
+        ]
+    },
+    "var-date": {
+        "prefix": "date",
+        "body": [
+            "%A_YYYY%-%A_MM%-%A_DD%"
+        ]
+    },
+    "var-time": {
+        "prefix": "time",
+        "body": [
+            "%A_Hour%:%A_Min%:%A_Sec%"
+        ]
+    },
+    "var-stamp": {
+        "prefix": "stamp",
+        "body": [
+            "%A_YYYY%-%A_MM%-%A_DD%T%A_Hour%-%A_Min%-%A_Sec%Z"
+        ]
+    },
+    "func-admin": {
+        "prefix": "admin()",
+        "body": [
+            "mk_admin() {",
+            "\tif (A_IsAdmin || DllCall(\"GetCommandLine\", \"str\") ~= \" /restart(?!\\S)\")",
+            "\t\treturn",
+            "\ttry{",
+            "\t\tif A_IsCompiled",
+            "\t\t\tRun *RunAs \"%A_ScriptFullPath%\" /restart",
+            "\t\telse",
+            "\t\t\tRun *RunAs \"%A_AhkPath%\" /restart \"%A_ScriptFullPath%\"",
+            "\t\tExitApp",
+            "\t}",
+            "}"
+        ]
+    },
+    "func-init": {
+        "prefix": "init()",
+        "body": [
+            "init() {",
+            "\tglobal log_file := \"%A_ScriptDir%\\%A_YYYY%-%A_MM%-%A_DD%.log\"",
+            "}"
+        ]
+    },
+    "func-shell": {
+        "prefix": "shell()",
+        "body": [
+            "shell(command) {",
+            "\tshell := ComObject(\"WScript.Shell\")",
+            "\texec := shell.Exec(\"%ComSpec% /c /nologo \" . command)",
+            "\twhile(exec.Status == 0)",
+            "\t\tSleep, 100",
+            "\treturn { out: exec.StdOut.ReadAll()",
+            "\t\t, err: exec.StdErr.ReadAll()",
+            "\t\t, code: exec.Status }",
+            "}"
+        ]
+    },
+    "func-log": {
+        "prefix": "log()",
+        "body": [
+            "log(caller, message) {",
+            "\tglobal log_file",
+            "\tstamp := \"%A_YYYY%-%A_MM%-%A_DD%T%A_Hour%:%A_Min%:%A_Sec%\"",
+            "\tentry := caller . \"|\" . message",
+            "\tOutputDebug, %entry%",
+            "\tFileAppend, %stamp%|%entry%`n, %log_file%",
+            "}"
+        ]
+    }
+}

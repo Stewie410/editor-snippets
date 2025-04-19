@@ -1,0 +1,144 @@
+{
+    "bang": {
+        "prefix": "#b",
+        "body": [
+            "@echo off",
+            "setlocal EnableExtensions EnableDelayedExpansion"
+        ]
+    },
+    "globals": {
+        "prefix": "globals",
+        "body": [
+            "set \"log=!USERPROFILE!\\.log\\scripts\\%~nx0.log\"",
+            "set \"callers=%~nx0\"",
+            "$0"
+        ]
+    },
+    "var-date": {
+        "prefix": "date",
+        "body": [
+            "!date:~10,4!-!date:~7,2~!-!date:~4,2!"
+        ]
+    },
+    "var-time": {
+        "prefix": "time",
+        "body": [
+            "!time!"
+        ]
+    },
+    "var-stamp": {
+        "prefix": "stamp",
+        "body": [
+            "!date:~10,4!-!date:~7,2~!-!date:~4,2!T!time!"
+        ]
+    },
+    "func-templ": {
+        "prefix": "fn()",
+        "body": [
+            ":${1:fname} ${2:<args>}",
+            "\t$0",
+            "exit /b"
+        ]
+    },
+    "func-stack": {
+        "prefix": "stack()",
+        "body": [
+            ":func <label> [arg [...]]",
+            "\tset \"callers=%1`!callers!\"",
+            "\tcall %*",
+            "\tset \"callers=!callers:*`=!\"",
+            "exit /b"
+        ]
+    },
+    "func-mkparent": {
+        "prefix": "mkparent()",
+        "body": [
+            ":mkparent <path>",
+            "\tmd \"%~dp1\"",
+            "exit /b"
+        ]
+    },
+    "func-require": {
+        "prefix": "require()",
+        "body": [
+            ":require <app>",
+            "\tnul 2>&1 where \"%~1\" && exit /b 0",
+            "\t1>&2 call :log Missing required applications: \"%~1\"",
+            "exit /b"
+        ]
+    },
+    "func-help": {
+        "prefix": "help()",
+        "body": [
+            ":show_help",
+            "\techo(${1:Description}",
+            "\techo(",
+            "\techo(USAGE: %~nx0 [OPTIONS] ${2:args}",
+            "\techo(",
+            "\tOPTIONS:",
+            "\techo(    -h, --help              Show this help message",
+            "exit /b"
+        ]
+    },
+    "func-admin": {
+        "prefix": "is-admin()",
+        "body": [
+            ":is_admin",
+            "\t>nul 2>&1 net session && exit /b 0",
+            "\t1>&2 echo(%~nx0 requires administrator",
+            "exit /b 1"
+        ]
+    },
+    "func-log": {
+        "prefix": "log()",
+        "body": [
+            ":log <message>",
+            "\tif not defined log set \"log=nul\"",
+            "\tfor /F \"delims=` %%a in (\"!callers!\") do set \"_name=%%a\"",
+            "\techo(!_name:%~0,20!^|%*",
+            "\t>> \"!log!\" echo(!date:~10,4!-!date:~7,2!-!date:~4,2!T!time!^|!_name:~0,20!^|%*",
+            "exit /b"
+        ]
+    },
+    "func-main": {
+        "prefix": "main()",
+        "body": [
+            ":main",
+            "\tset \"_gather=\"",
+            "\tset \"remaining=\"",
+            "\tfor %%a in (%*) do (",
+            "\t\tif defined reamining (",
+            "\t\t\tset \"remaining=!remaining! %%a\"",
+            "\t\t) else if defined _gather (",
+            "\t\t\tset \"!_gather!=%%~a\"",
+            "\t\t\tset \"_gather=\"",
+            "\t\t) else (",
+            "\t\t\tset \"_=%%~a\"",
+            "\t\t\tif \"!_!\"==\"--\" (",
+            "\t\t\t\tset \"remaining= \"",
+            "\t\t\t) else if \"!_:~0,2!\"==\"--\" (",
+            "\t\t\t\tset \"_=!_:~2!\"",
+            "\t\t\t\tif \"!_!\"==\"help\" (",
+            "\t\t\t\t\tcall :show_help",
+            "\t\t\t\t\texit /b 0",
+            "\t\t\t\t)",
+            "\t\t\t) else if \"!_:~0,1!\"==\"-\" (",
+            "\t\t\t\tset \"_=!_:~1!\"",
+            "\t\t\t\tif \"!_!\"==\"h\" (",
+            "\t\t\t\t\tcall :show_help",
+            "\t\t\t\t\texit /b 0",
+            "\t\t\t\t)",
+            "\t\t\t) else (",
+            "\t\t\t\t1>&2 echo(ERROR: Unexpected argument: %%~a",
+            "\t\t\t)",
+            "\t\t)",
+            "\t)",
+            "\tset \"_gather=\"",
+            "\tcall :mkparent \"!log!\"",
+            "\tcopy nul \"!log!\"",
+            "",
+            "\t$0",
+            "exit /b"
+        ]
+    }
+}

@@ -1,0 +1,271 @@
+{
+    "bang": {
+        "prefix": "#p",
+        "body": [
+            "#!/usr/bin/env pwsh"
+        ]
+    },
+    "help-comment": {
+        "prefix": "#help",
+        "body": [
+            "<#",
+            ".SYNOPSIS",
+            "${1:summary}",
+            ".DESCRIPTION",
+            "${2:description}",
+            "$0",
+            "#>"
+        ]
+    },
+    "req-admin": {
+        "prefix": "#admin",
+        "body": [
+            "#Requires -RunAsAdministrator"
+        ]
+    },
+    "req-version": {
+        "prefix": "#version",
+        "body": [
+            "#Requires -Version ${1:5.1}"
+        ]
+    },
+    "req-edition": {
+        "prefix": "#edition",
+        "body": [
+            "#Requires -Edition ${1:Desktop}"
+        ]
+    },
+    "req-module": {
+        "prefix": "#module",
+        "body": [
+            "#Requires -Modules @('${1:module}')"
+        ]
+    },
+    "param-cmdlet": {
+        "prefix": "param-cmdlet",
+        "body": [
+            "[CmdletBinding($1)]",
+            "param(",
+            "\t$0",
+            ")"
+        ]
+    },
+    "param-func": {
+        "prefix": "param-func",
+        "body": [
+            "param(",
+            "\t$0",
+            ")"
+        ]
+    },
+    "def-log": {
+        "prefix": "def-log",
+        "body": [
+            "[string] \\$LogFile = (New-LogFile).FullName"
+        ]
+    },
+    "var-date": {
+        "prefix": "date",
+        "body": [
+            "Get-Date -UFormat '+%F'"
+        ]
+    },
+    "var-time": {
+        "prefix": "time",
+        "body": [
+            "Get-Date -UFormat '+%T'"
+        ]
+    },
+    "var-stamp": {
+        "prefix": "stamp",
+        "body": [
+            "Get-Date -UFormat '+%FT%T%Z'"
+        ]
+    },
+    "func-log": {
+        "prefix": "log()",
+        "body": [
+            "function Write-Log {",
+            "\t[CmdletBinding(DefaultParameterSetName = 'Info')]",
+            "\tparam(",
+            "\t\t[Alias('I')]",
+            "\t\t[Parameter(ParameterSetName = 'Info')]",
+            "\t\t[switch]",
+            "\t\t$Info,",
+            "",
+            "\t\t[Alias('W')]",
+            "\t\t[Parameter(Mandatory, ParameterSetName = 'Warn')]",
+            "\t\t[switch]",
+            "\t\t$Warn,",
+            "",
+            "\t\t[Alias('E')]",
+            "\t\t[Parameter(Mandatory, ParameterSetName = 'Error')]",
+            "\t\t[switch]",
+            "\t\t$Err,",
+            "",
+            "\t\t[Parameter(ParameterSetName = 'Error')]",
+            "\t\t[switch]",
+            "\t\t$Throw,",
+            "",
+            "\t\t[Alias('D')]",
+            "\t\t[Parameter(Mandatory, ParameterSetName = 'Debug')]",
+            "\t\t[switch]",
+            "\t\t$DBug,",
+            "",
+            "\t\t[Alias('V')]",
+            "\t\t[Parameter(Mandatory, ParameterSetName = 'Verb')]",
+            "\t\t[switch]",
+            "\t\t$Verb,",
+            "",
+            "\t\t[Parameter(Mandatory, ValueFromPipeline, Position = 0)]",
+            "\t\t[string]",
+            "\t\t$Message,",
+            "",
+            "\t\t[Alias('A')]",
+            "\t\t[Parameter()]",
+            "\t\t[switch]",
+            "\t\t$Append",
+            "\t)",
+            "",
+            "\tBEGIN {",
+            "\t\t\\$parts = @{",
+            "\t\t\tTime = Get-Date -UFormat '+%FT%T%Z'",
+            "\t\t\tLevel = $PSCmdlet.ParameterSetName.ToLower()",
+            "\t\t\tCaller = (Get-PSCallStack)[1]",
+            "\t\t}",
+            "\t\tif ($parts.Caller -match 'ScriptBlock') {",
+            "\t\t\t$parts.Caller = Split-Path -Path \\$PSCommandPath -Leaf",
+            "\t\t}",
+            "\t\tif (!(Get-Variable -Name 'LogFile' -ErrorAction SilentlyContinue)) {",
+            "\t\t\t$LogFile = \\$null",
+            "\t\t}",
+            "\t}",
+            "",
+            "\tPROCESS {",
+            "\t\t$full = (\\$parts.Values -join '|') + '|' + \\$Message",
+            "\t\t$short = (\\$full -split '|' | Select-Object -Last 3) -join '|'",
+            "",
+            "\t\tif (\\$Append) {",
+            "\t\t\tAdd-Content -Path \\$LogFile -Value \\$full",
+            "\t\t}",
+            "\t\tswitch (\\$parts.Level) {",
+            "\t\t\t'info' { Write-Host \\$short }",
+            "\t\t\t'warn' { Write-Warning -Message \\$short }",
+            "\t\t\t'error' {",
+            "\t\t\t\tWrite-Error -Message \\$short -ErrorAction Continue",
+            "\t\t\t\tif ($Throw) { throw \\$short }",
+            "\t\t\t}",
+            "\t\t\t'debug' { Write-Debug -Message \\$full }",
+            "\t\t\t'verb' { Write-Verbose -Message \\$full }",
+            "\t\t}",
+            "\t}",
+            "",
+            "\tEND {}",
+            "}"
+        ]
+    },
+    "func-toast": {
+        "prefix": "toast()",
+        "body": [
+            "function Send-ToastNotification {",
+            "\t[CmdletBinding()]",
+            "\tparam(",
+            "\t\t[Parameter(Mandatory, ValueFromPipeline, Position = 0)]",
+            "\t\t[string]",
+            "\t\t\\$Message,",
+            "",
+            "\t\t[Parameter()]",
+            "\t\t[string]",
+            "\t\t\\$Subject = 'N/A'",
+            "\t)",
+            "",
+            "\t[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null",
+            "\t\\$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent(",
+            "\t\t[Windows.UI.Notifications.GetTemplateType]::ToastText02",
+            "\t)",
+            "",
+            "\t\\$raw = [xml] \\$template.GetXml()",
+            "\t(\\$raw.toast.visual.binding.text | Where-Object { \\$_.id -eq '1' }).AppendChild(\\$raw.CreateTextNode(\\$Subject)) | Out-Null",
+            "\t(\\$raw.toast.visual.binding.text | Where-Object { \\$_.id -eq '2' }).AppendChild(\\$raw.CreateTextNode(\\$Message)) | Out-Null",
+            "",
+            "\t\\$serial = [Windows.Data.Xml.Dom.XmlDocument]::new()",
+            "\t\\$serial.LoadXml(\\$raw.OuterXml)",
+            "",
+            "\t\\$toast = [Windows.UI.Notifications.ToastNotification]::new(\\$serial)",
+            "\t\\$toast.Tag = 'PowerShell'",
+            "\t\\$toast.Group = 'PowerShell'",
+            "\t\\$toast.ExpirationTime = [DateTimeOffset]::Now.AddMinutes(1)",
+            "",
+            "\t\\$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('PowerShell')",
+            "\t\\$notifier.Show(\\$toast)",
+            "}"
+        ]
+    },
+    "func-logfile": {
+        "prefix": "logfile()",
+        "body": [
+            "function New-LogFile {",
+            "\t\\$params = @{",
+            "\t\tPath = Join-Path -Path \\$env:USERPROFILE -ChildPath '.log' | Join-Path -ChildPath 'scripts'",
+            "\t\tItemType = 'File'",
+            "\t\tName = '{0}.log' -f ((Split-Path -Path \\$PSCommandPath -Leaf) -replace '\\.ps1\\$', '')",
+            "\t\tErrorAction = 'Ignore'",
+            "\t}",
+            "",
+            "\tNew-Item @params",
+            "}"
+        ]
+    },
+    "func-tempdir": {
+        "prefix": "tempdir()",
+        "body": [
+            "function New-TemporaryDirectory {",
+            "\t\\$parent = [System.IO.Path]::GetTempPath()",
+            "\t\\$name = [System.Guid]::NewGuid().Guid",
+            "\tNew-Item -ItemType Directory -Path (Join-Path -Path \\$parent -ChildPath \\$name)",
+            "}"
+        ]
+    },
+    "func-admin": {
+        "prefix": "admin()",
+        "body": [
+            "function Test-IsAdmin {",
+            "\t\\$id = [System.Security.Principal.WindowsPrincipal][System.Security.Principal.WindowsIdentity]::GetCurrent()",
+            "\t\\$rol = [Security.Principal.WindowsBuiltInRole] 'Administrator'",
+            "\treturn \\$id.IsInRole(\\$role)",
+            "}"
+        ]
+    },
+    "func-ini": {
+        "prefix": "ini()",
+        "body": [
+            "function ConvertFrom-Ini {",
+            "\tparam([string]\\$Path)",
+            "",
+            "\t\\$ini = @{}",
+            "",
+            "\tswitch -regex -file \\$Path {",
+            "\t\t'^\\s*\\[(.+)\\]\\s*\\$' {",
+            "\t\t\t\\$section = \\$Matches[1]",
+            "\t\t\t\\$ini[\\$section] = [PSCustomObject]@{ Comments = @() }",
+            "\t\t}",
+            "\t\t'^\\s*;(.*)\\$' {",
+            "\t\t\t\\$ini[\\$section].Comments += @(\\$Matches[1].Trim())",
+            "\t\t}",
+            "\t\t'^([^=]+?)=(.*)\\$' {",
+            "\t\t\t\\$member = @{",
+            "\t\t\t\tInputObject = \\$ini[\\$section]",
+            "\t\t\t\tMemberType = 'NoteProperty'",
+            "\t\t\t\tName = \\$Matches[1].Trim()",
+            "\t\t\t\tValue = \\$Matches[2].Trim()",
+            "\t\t\t\tForce = \\$True",
+            "\t\t\t}",
+            "\t\t\tAdd-Member @member",
+            "\t\t}",
+            "\t}",
+            "",
+            "\treturn \\$ini",
+            "}"
+        ]
+    }
+}

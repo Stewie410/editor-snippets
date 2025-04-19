@@ -1,0 +1,171 @@
+{
+    "bang-bash": {
+        "prefix": "#b",
+        "body": [
+            "#!/usr/bin/env bash"
+        ]
+    },
+    "bang-sh": {
+        "prefix": "#s",
+        "body": [
+            "#!/usr/bin/env sh"
+        ]
+    },
+    "bang-posix": {
+        "prefix": "#p",
+        "body": [
+            "#!/bin/sh"
+        ]
+    },
+    "func-cleanup": {
+        "prefix": "cleanup()",
+        "body": [
+            "cleanup() {",
+            "\t${1:false}",
+            "}"
+        ]
+    },
+    "func-templ": {
+        "prefix": "fn()",
+        "body": [
+            "${1:fname}() {",
+            "\t$0",
+            "}"
+        ]
+    },
+    "func-log": {
+        "prefix": "log()",
+        "body": [
+            "log() {",
+            "\tprintf '%s|%s|%s\\n' \"\\$(date --iso-8601='sec')\" \"\\${FUNCNAME[1]:-${0##*/}}\" \"\\${1}\" \\",
+            "\t\t| tee --append \"\\${log:-/dev/null}\" \\",
+            "\t\t| cut --fields='2-' --delimiter='|' \\",
+            "\t\t;",
+            "}"
+        ]
+    },
+    "func-log-posix": {
+        "prefix": "posix-log()",
+        "body": [
+            "log() {",
+            "\tprintf '%s|%s\\n' \"\\$(date --iso-8601='sec')\" \"\\${1}\" \\",
+            "\t\t| tee --append \"\\${log:-/dev/null}\" \\",
+            "\t\t| cut --fields='2-' --delimiter='|' \\",
+            "\t\t;",
+            "}"
+        ]
+    },
+    "func-help": {
+        "prefix": "help()",
+        "body": [
+            "show_help() {",
+            "\tcat << EOF",
+            "${1:description}",
+            "",
+            "USAGE: \\${0##*/} [OPTIONS]",
+            "",
+            "OPTIONS:",
+            "   -h, --help          Show this help message",
+            "EOF",
+            "}"
+        ]
+    },
+    "func-require": {
+        "prefix": "require()",
+        "body": [
+            "require() {",
+            "\tcommand -v \"\\${1}\" >/dev/null 2>&1 && return 0",
+            "\tprintf 'Missing required application: %s\\n' \"\\${1}\" >&2",
+            "\treturn 1",
+            "}"
+        ]
+    },
+    "func-admin": {
+        "prefix": "is_admin()",
+        "body": [
+            "is_admin() {",
+            "\t(( EUID == 0 )) && return 0",
+            "\tprintf 'Requires root or sudo\\n' >&2",
+            "\treturn 1",
+            "}"
+        ]
+    },
+    "func-admin-posix": {
+        "prefix": "posix-is_admin()",
+        "body": [
+            "is_admin() {",
+            "\t[ \"\\${EUID}\" -eq 0 ] && return 0",
+            "\tprintf 'Requires root or sudo\\n' >&2",
+            "\treturn 1",
+            "}"
+        ]
+    },
+    "func-main": {
+        "prefix": "main()",
+        "body": [
+            "main() {",
+            "\tlocal opts",
+            "\topts=\"\\$(getopt \\",
+            "\t\t--options h \\",
+            "\t\t--longoptions help \\",
+            "\t\t--name \"\\${0##*/}\" \\",
+            "\t\t-- \"\\${@}\" \\",
+            "\t)\"",
+            "",
+            "\teval set -- \"\\${opts}\"",
+            "\twhile true; do",
+            "\t\tcase \"\\${1}\" in",
+            "\t\t\t-h | --help )        show_help; return 0;;",
+            "\t\t\t-- )                 shift; break;;",
+            "\t\t\t* )                  break;;",
+            "\t\tesac",
+            "\t\tshift",
+            "\tdone",
+            "",
+            "\tmkdir --parents \"\\${log%/*}\"",
+            "\ttouch -a \"\\${log}\"",
+            "",
+            "$0",
+            "}"
+        ]
+    },
+    "func-main-posix": {
+        "prefix": "posix-main()",
+        "body": [
+            "main() {",
+            "\twhile getopts ':h' arg; do",
+            "\t\tcase \"\\${arg}\" in",
+            "\t\t\th )  show_help; return 0;;",
+            "\t\tesac",
+            "\tdone",
+            "\tshift \"\\$(( OPTIND - 1 ))\"",
+            "",
+            "$0",
+            "}"
+        ]
+    },
+    "for-list": {
+        "prefix": "for",
+        "body": [
+            "for ${1:i} in ${2:list}; do",
+            "\t$0",
+            "done"
+        ]
+    },
+    "for-array": {
+        "prefix": "for-@",
+        "body": [
+            "for ${1:i} in \"\\${${2:array}[@]}\"; do",
+            "\t$0",
+            "done"
+        ]
+    },
+    "for-cstyle": {
+        "prefix": "for-c",
+        "body": [
+            "for (( ${1:init}; ${2:condition}; ${3:iter} )); do",
+            "\t$0",
+            "done"
+        ]
+    }
+}

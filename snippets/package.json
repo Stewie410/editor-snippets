@@ -1,0 +1,34 @@
+{
+    "name": "personal-snippets",
+    "controbutes": {
+        "snippets": [
+            {
+                "language": "sh",
+                "path": "./vscode/shellscript.json"
+            },
+            {
+                "language": "dosbatch",
+                "path": "./vscode/dosbatch.json"
+            },
+            {
+                "language": [
+                    "powershell",
+                    "ps1"
+                ],
+                "path": "./vscode/powershell.json"
+            },
+            {
+                "language": "autohotkey",
+                "path": "./vscode/ahk.json"
+            },
+            {
+                "language": "autohotkey2",
+                "path": "./vscode/ahk2.json"
+            },
+            {
+                "language": "all",
+                "path": "./vscode/allFiletypes.json"
+            }
+        ]
+    }
+}
