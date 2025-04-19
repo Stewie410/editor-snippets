@@ -1,36 +1,36 @@
 {
     "name": "personal-snippets",
-    "controbutes": {
+    "contributes": {
         "snippets": [
             {
                 "language": [
                     "sh",
                     "bash"
                 ],
-                "path": "./vscode/shellscript.json"
+                "path": "./snippets/shellscript.json"
             },
             {
                 "language": "dosbatch",
-                "path": "./vscode/dosbatch.json"
+                "path": "./snippets/dosbatch.json"
             },
             {
                 "language": [
                     "powershell",
                     "ps1"
                 ],
-                "path": "./vscode/powershell.json"
+                "path": "./snippets/powershell.json"
             },
             {
                 "language": "autohotkey",
-                "path": "./vscode/ahk.json"
+                "path": "./snippets/ahk.json"
             },
             {
                 "language": "autohotkey2",
-                "path": "./vscode/ahk2.json"
+                "path": "./snippets/ahk2.json"
             },
             {
                 "language": "all",
-                "path": "./vscode/allFiletypes.json"
+                "path": "./snippets/allFiletypes.json"
             }
         ]
     }
