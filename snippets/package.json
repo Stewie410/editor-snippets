@@ -3,7 +3,10 @@
     "controbutes": {
         "snippets": [
             {
-                "language": "sh",
+                "language": [
+                    "sh",
+                    "bash"
+                ],
                 "path": "./vscode/shellscript.json"
             },
             {
