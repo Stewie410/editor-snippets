@@ -1,12 +1,12 @@
 {
     "bang": {
-        "prefix": "#p",
+        "prefix": "pwsh",
         "body": [
             "#!/usr/bin/env pwsh"
         ]
     },
     "help-comment": {
-        "prefix": "#help",
+        "prefix": "help",
         "body": [
             "<#",
             ".SYNOPSIS",
@@ -18,25 +18,25 @@
         ]
     },
     "req-admin": {
-        "prefix": "#admin",
+        "prefix": "req-admin",
         "body": [
             "#Requires -RunAsAdministrator"
         ]
     },
     "req-version": {
-        "prefix": "#version",
+        "prefix": "req-version",
         "body": [
             "#Requires -Version ${1:5.1}"
         ]
     },
     "req-edition": {
-        "prefix": "#edition",
+        "prefix": "req-edition",
         "body": [
             "#Requires -Edition ${1:Desktop}"
         ]
     },
     "req-module": {
-        "prefix": "#module",
+        "prefix": "req-module",
         "body": [
             "#Requires -Modules @('${1:module}')"
         ]
@@ -83,7 +83,7 @@
         ]
     },
     "func-log": {
-        "prefix": "log()",
+        "prefix": "fn-log",
         "body": [
             "function Write-Log {",
             "\t[CmdletBinding(DefaultParameterSetName = 'Info')]",
@@ -165,7 +165,7 @@
         ]
     },
     "func-toast": {
-        "prefix": "toast()",
+        "prefix": "fn-toast",
         "body": [
             "function Send-ToastNotification {",
             "\t[CmdletBinding()]",
@@ -202,7 +202,7 @@
         ]
     },
     "func-logfile": {
-        "prefix": "logfile()",
+        "prefix": "fn-logfile",
         "body": [
             "function New-LogFile {",
             "\t\\$params = @{",
@@ -217,7 +217,7 @@
         ]
     },
     "func-tempdir": {
-        "prefix": "tempdir()",
+        "prefix": "fn-tempdir",
         "body": [
             "function New-TemporaryDirectory {",
             "\t\\$parent = [System.IO.Path]::GetTempPath()",
@@ -227,7 +227,7 @@
         ]
     },
     "func-admin": {
-        "prefix": "admin()",
+        "prefix": "fn-admin",
         "body": [
             "function Test-IsAdmin {",
             "\t\\$id = [System.Security.Principal.WindowsPrincipal][System.Security.Principal.WindowsIdentity]::GetCurrent()",
@@ -237,7 +237,7 @@
         ]
     },
     "func-ini": {
-        "prefix": "ini()",
+        "prefix": "fn-ini",
         "body": [
             "function ConvertFrom-Ini {",
             "\tparam([string]\\$Path)",

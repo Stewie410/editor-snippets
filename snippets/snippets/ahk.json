@@ -55,7 +55,7 @@
         ]
     },
     "func-admin": {
-        "prefix": "admin()",
+        "prefix": "fn-admin",
         "body": [
             "mk_admin() {",
             "\tif (A_IsAdmin || DllCall(\"GetCommandLine\", \"str\") ~= \" /restart(?!\\S)\")",
@@ -71,7 +71,7 @@
         ]
     },
     "func-init": {
-        "prefix": "init()",
+        "prefix": "fn-init",
         "body": [
             "init() {",
             "\tglobal log_file := \"%A_ScriptDir%\\%A_YYYY%-%A_MM%-%A_DD%.log\"",
@@ -79,7 +79,7 @@
         ]
     },
     "func-shell": {
-        "prefix": "shell()",
+        "prefix": "fn-shell",
         "body": [
             "shell(command) {",
             "\tshell := ComObject(\"WScript.Shell\")",
@@ -93,7 +93,7 @@
         ]
     },
     "func-log": {
-        "prefix": "log()",
+        "prefix": "fn-log",
         "body": [
             "log(caller, message) {",
             "\tglobal log_file",

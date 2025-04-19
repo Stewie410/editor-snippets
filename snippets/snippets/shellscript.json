@@ -1,24 +1,19 @@
 {
     "bang-bash": {
-        "prefix": "#b",
+        "prefix": "bash",
         "body": [
             "#!/usr/bin/env bash"
-        ]
-    },
-    "bang-sh": {
-        "prefix": "#s",
-        "body": [
-            "#!/usr/bin/env sh"
-        ]
+        ],
+        "description": "bash shebang"
     },
     "bang-posix": {
-        "prefix": "#p",
+        "prefix": "shell",
         "body": [
             "#!/bin/sh"
         ]
     },
     "func-cleanup": {
-        "prefix": "cleanup()",
+        "prefix": "fn-cleanup",
         "body": [
             "cleanup() {",
             "\t${1:false}",
@@ -26,7 +21,7 @@
         ]
     },
     "func-templ": {
-        "prefix": "fn()",
+        "prefix": "fn",
         "body": [
             "${1:fname}() {",
             "\t$0",
@@ -34,7 +29,7 @@
         ]
     },
     "func-log": {
-        "prefix": "log()",
+        "prefix": "fn-log",
         "body": [
             "log() {",
             "\tprintf '%s|%s|%s\\n' \"\\$(date --iso-8601='sec')\" \"\\${FUNCNAME[1]:-${0##*/}}\" \"\\${1}\" \\",
@@ -45,7 +40,7 @@
         ]
     },
     "func-log-posix": {
-        "prefix": "posix-log()",
+        "prefix": "fn-log-posix",
         "body": [
             "log() {",
             "\tprintf '%s|%s\\n' \"\\$(date --iso-8601='sec')\" \"\\${1}\" \\",
@@ -56,7 +51,7 @@
         ]
     },
     "func-help": {
-        "prefix": "help()",
+        "prefix": "fn-help",
         "body": [
             "show_help() {",
             "\tcat << EOF",
@@ -71,7 +66,7 @@
         ]
     },
     "func-require": {
-        "prefix": "require()",
+        "prefix": "fn-require",
         "body": [
             "require() {",
             "\tcommand -v \"\\${1}\" >/dev/null 2>&1 && return 0",
@@ -81,7 +76,7 @@
         ]
     },
     "func-admin": {
-        "prefix": "is_admin()",
+        "prefix": "fn-admin",
         "body": [
             "is_admin() {",
             "\t(( EUID == 0 )) && return 0",
@@ -91,7 +86,7 @@
         ]
     },
     "func-admin-posix": {
-        "prefix": "posix-is_admin()",
+        "prefix": "fn-admin-posix",
         "body": [
             "is_admin() {",
             "\t[ \"\\${EUID}\" -eq 0 ] && return 0",
@@ -101,7 +96,7 @@
         ]
     },
     "func-main": {
-        "prefix": "main()",
+        "prefix": "fn-main",
         "body": [
             "main() {",
             "\tlocal opts",
@@ -130,7 +125,7 @@
         ]
     },
     "func-main-posix": {
-        "prefix": "posix-main()",
+        "prefix": "fn-main-posix",
         "body": [
             "main() {",
             "\twhile getopts ':h' arg; do",

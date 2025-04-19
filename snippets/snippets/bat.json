@@ -1,6 +1,6 @@
 {
     "bang": {
-        "prefix": "#b",
+        "prefix": "sane",
         "body": [
             "@echo off",
             "setlocal EnableExtensions EnableDelayedExpansion"
@@ -33,7 +33,7 @@
         ]
     },
     "func-templ": {
-        "prefix": "fn()",
+        "prefix": "fn",
         "body": [
             ":${1:fname} ${2:<args>}",
             "\t$0",
@@ -41,7 +41,7 @@
         ]
     },
     "func-stack": {
-        "prefix": "stack()",
+        "prefix": "fn-stack",
         "body": [
             ":func <label> [arg [...]]",
             "\tset \"callers=%1`!callers!\"",
@@ -51,7 +51,7 @@
         ]
     },
     "func-mkparent": {
-        "prefix": "mkparent()",
+        "prefix": "fn-mkparent",
         "body": [
             ":mkparent <path>",
             "\tmd \"%~dp1\"",
@@ -59,7 +59,7 @@
         ]
     },
     "func-require": {
-        "prefix": "require()",
+        "prefix": "fn-require",
         "body": [
             ":require <app>",
             "\tnul 2>&1 where \"%~1\" && exit /b 0",
@@ -68,7 +68,7 @@
         ]
     },
     "func-help": {
-        "prefix": "help()",
+        "prefix": "fn-help",
         "body": [
             ":show_help",
             "\techo(${1:Description}",
@@ -81,7 +81,7 @@
         ]
     },
     "func-admin": {
-        "prefix": "is-admin()",
+        "prefix": "fn-is-admin",
         "body": [
             ":is_admin",
             "\t>nul 2>&1 net session && exit /b 0",
@@ -90,7 +90,7 @@
         ]
     },
     "func-log": {
-        "prefix": "log()",
+        "prefix": "fn-log",
         "body": [
             ":log <message>",
             "\tif not defined log set \"log=nul\"",
@@ -101,7 +101,7 @@
         ]
     },
     "func-main": {
-        "prefix": "main()",
+        "prefix": "fn-main",
         "body": [
             ":main",
             "\tset \"_gather=\"",
