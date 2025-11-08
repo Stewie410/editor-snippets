@@ -3,7 +3,7 @@
 # level, message [...]
 log() {
     case "${1,,}" in
-        "0" | "ermeg" )     printf '<0>%s\n' "${@:2}" >&4;;
+        "0" | "emerg" )     printf '<0>%s\n' "${@:2}" >&4;;
         "1" | "alert" )     printf '<1>%s\n' "${@:2}" >&4;;
         "2" | "crit" )      printf '<2>%s\n' "${@:2}" >&4;;
         "3" | "err" )       printf '%s\n' "${@:2}" >&2;;
