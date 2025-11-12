@@ -1,9 +1,9 @@
 #!/bin/sh
 
 log() {
-    printf '%s|%s\n' "$(date --iso-8601=sec)" "${1}" | \
-        tee --append "${log:-/dev/null}" | \
-        cut --fields="2-" --delimiter="|"
+    printf '%s|%s\n' "$(date --iso-8601=sec)" "${1}" \
+        | tee --append "${log:-/dev/null}" \
+        | cut --fields="2-" --delimiter="|"
 }
 
 show_help() {
@@ -31,5 +31,6 @@ main() {
     touch -a "${log}"
 }
 
-log="/var/log/scripts/${USER}/$(basename "${0%.*}").log"
+log="${HOME}/.local/logs/$(basename "${0%.*}").log"
+
 main "${@}"
