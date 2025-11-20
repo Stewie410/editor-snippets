@@ -32,5 +32,6 @@ main() {
 }
 
 log="${HOME}/.local/logs/$(basename "${0%.*}").log"
+here="$(cd "$(dirname "${@}")" && pwd)"
 
 main "${@}"
