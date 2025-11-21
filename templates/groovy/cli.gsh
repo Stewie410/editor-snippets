@@ -4,7 +4,6 @@ import groovy.cli.commons.CliBuilder
 import org.codehaus.groovy.runtime.MethodClosure
 import com.sun.tools.javac.main.Option$InvalidValueException
 
-
 class ClassNameTmpl {
   final String SCRIPT_NAME = org.codehaus.groovy.runtime.StackTraceUtils.deepSanitize(new Exception()).getStackTrace().last().getFileName()
   final String SCRIPT_BASE = SCRIPT_NAME.take(SCRIPT_NAME.lastIndexOf("."))
@@ -68,17 +67,14 @@ class CliLogger {
 
     private final String color
     private final boolean isError
-    private final MethodClosure facility
 
     LogLevel(String color, boolean isError) {
       this.color = color
       this.isError = isError
-      this.facility = isError ? System.err::println : System.out::println
     }
 
     private String color() { return color }
     private String isError() { return error }
-    private MethodClosure facility() { return facility }
   }
 
   void mklog() {
@@ -92,10 +88,11 @@ class CliLogger {
   void writer(LogLevel level, String[] messages) {
     def color = this.useColor ? level.color() : ""
     def name = level.name().padRight(9)
+    def stream = level.isError() ? System.err : System.out
 
     messages.each { ->
       def stamp = this.sdf.format(new java.util.Date())
-      level.facility << "[${stamp}] [${color}${name}\u001B[0m] ${it}"
+      stream.println("[${stamp}] [${color}${name}\u001B[0m] ${it}")
       if (this.outfile != null) {
         this.outfile << "[${stamp}] [${name}] ${it}\n"
       }
