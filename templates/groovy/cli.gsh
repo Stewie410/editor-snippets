@@ -1,6 +1,9 @@
 #!/usr/bin/env groovy
 
 import groovy.cli.commons.CliBuilder
+import org.codehaus.groovy.runtime.MethodClosure
+import com.sun.tools.javac.main.Option$InvalidValueException
+
 
 class ClassNameTmpl {
   final String SCRIPT_NAME = org.codehaus.groovy.runtime.StackTraceUtils.deepSanitize(new Exception()).getStackTrace().last().getFileName()
@@ -29,84 +32,82 @@ class ClassNameTmpl {
       System.exit(opts.h ? 0 : 1)
     }
 
-    return new ClassNameTmpl(
-      log: new CliLogger(!opts.C, "/var/log/${SCRIPT_BASE}/${SCRIPT_BASE}.log")
-    )
+    def inst = new ClassNameTmpl(log: new CliLogger(useColor: !opts.C))
+    // inst.log.outfile = new java.io.File("/dev/null")
+    // inst.log.mklog()
+
+    return inst
   }
 
   private void execute() {
     // ...
+  }
+
+  private void die(String[] msg) {
+    this.log.emerg(msg)
+    System.exit(1)
   }
 }
 
 // use log4j if you need more support
 class CliLogger {
   java.io.File outfile
-  boolean writeOut = false
-  boolean useColor = true
-  SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss:ZZZ")
+  boolean useColor
 
-  CliLogger(boolean color, String path) {
-    this.useColor = color
+  private def sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss:ZZZ")
 
-    if (path == null || path.isEmpty()) {
-      return
+  private enum LogLevel {
+    EMERGENCY ("\u001B[1;31m", true),
+    ALERT     ("\u001B[1;36m", true),
+    CRITICAL  ("\u001B[1;33m", true),
+    ERROR     ("\u001B[0;31m", true),
+    WARNING   ("\u001B[0;33m", false),
+    NOTICE    ("\u001B[1;37m", false),
+    INFO      ("\u001B[0;32m", false),
+    DEBUG     ("\u001B[1;35m", false);
+
+    private final String color
+    private final boolean isError
+    private final MethodClosure facility
+
+    LogLevel(String color, boolean isError) {
+      this.color = color
+      this.isError = isError
+      this.facility = isError ? System.err::println : System.out::println
     }
 
-    this.outfile = new java.io.File(path)
-    this.writeOut = true
+    private String color() { return color }
+    private String isError() { return error }
+    private MethodClosure facility() { return facility }
+  }
+
+  void mklog() {
+    assert this.outfile != null
     if (!this.outfile.exists()) {
       this.outfile.mkdirs()
       this.outfile.createNewFile()
     }
   }
 
-   void writeOut(String plain, String rgb, boolean stderr, String[] messages) {
-    def facility = stderr ? System.err : System.out
-    rgb = this.useColor ? rgb : plain
+  void writer(LogLevel level, String[] messages) {
+    def color = this.useColor ? level.color() : ""
+    def name = level.name().padRight(9)
+
     messages.each { ->
       def stamp = this.sdf.format(new java.util.Date())
-      facility.println("[${stamp}] [${rgb.padRight(9)}] ${it}")
-      if (this.writeOut) {
-        this.outfile << "[${stamp}] [${plain.padRight(9)}] ${it}\n"
+      level.facility << "[${stamp}] [${color}${name}\u001B[0m] ${it}"
+      if (this.outfile != null) {
+        this.outfile << "[${stamp}] [${name}] ${it}\n"
       }
     }
   }
 
-  void emerg(String[] messages) {
-    writeOut("EMERGENCY", "\u001B[1;31mEMERGENCY\u001B[0m", true, messages)
-  }
-
-  void die(String[] messages) {
-    emerg(messages)
-    System.exit(1)
-  }
-
-  void alert(String[] messages) {
-    writeOut("ALERT", "\u001B[1;36mALERT\u001B[0m", true, messages)
-  }
-
-  void crit(String[] messages) {
-    writeOut("CRITICAL", "\u001B[1;33mCRITICAL\u001B[0m", true, messages)
-  }
-
-  void err(String[] messages) {
-    writeOut("ERROR", "\u001B[0;31mERROR\u001B[0m", true, messages)
-  }
-
-  void warn(String[] messages) {
-    writeOut("WARNING", "\u001B[0;33mWARNING\u001B[0m", false, messages)
-  }
-
-  void notice(String[] messages) {
-    writeOut("NOTICE", "\u001B[1;37mNOTICE\u001B[0m", false, messages)
-  }
-
-  void info(String[] messages) {
-    writeOut("INFO", "\u001B[0;32mINFO\u001B[0m", false, messages)
-  }
-
-  void debug(String[] messages) {
-    writeOut("DEBUG", "\u001B[1;35mDEBUG\u001B[0m", true, messages)
-  }
+  void emerg(String[] msg)  { this.writer(LogLevel.EMERGENCY, msg) }
+  void alert(String[] msg)  { this.writer(LogLevel.ALERT, msg) }
+  void crit(String[] msg)   { this.writer(LogLevel.CRITICAL, msg) }
+  void err(String[] msg)    { this.writer(LogLevel.ERROR, msg) }
+  void warn(String[] msg)   { this.writer(LogLevel.WARNING, msg) }
+  void notice(String[] msg) { this.writer(LogLevel.NOTICE, msg) }
+  void info(String[] msg)   { this.writer(LogLevel.INFO, msg) }
+  void debug(String[] msg)  { this.writer(LogLevel.DEBUG, msg) }
 }
