@@ -1,59 +1,37 @@
 #!/usr/bin/env groovy
 
 import groovy.cli.commons.CliBuilder
-import org.codehaus.groovy.runtime.MethodClosure
-import com.sun.tools.javac.main.Option$InvalidValueException
+import groovy.transform.SourceURI
+import java.io.File
+import java.nio.file.Path
+import java.nio.file.Paths
 
-class ClassNameTmpl {
-  final String SCRIPT_NAME = org.codehaus.groovy.runtime.StackTraceUtils.deepSanitize(new Exception()).getStackTrace().last().getFileName()
-  final String SCRIPT_BASE = SCRIPT_NAME.take(SCRIPT_NAME.lastIndexOf("."))
+// Do stuff...
+class ThisScript {
+  CliLogger log
 
-  private CliLogger log
-
-  static void main(String[] args) {
-    parseArgs(args).execute()
+  void cleanup() {
+    cleanup(0)
   }
 
-  static ClassNameTmpl parseArgs(String[] args) {
-    def cli = new CliBuilder(
-      usage: "${SCRIPT_NAME} [OPTIONS]",
-      header: "OPTIONS:"
-    )
-    // https://docs.groovy-lang.org/latest/html/gapi/groovy/cli/commons/CliBuilder.html
-    cli.with {
-      h(longOpt: 'help', 'Show this help message')
-      C(longOpt: 'cron', 'Do not use colored status messages')
-    }
-
-    def opts = cli.parse(args)
-    if (!opts || opts.h) {
-      cli.usage()
-      System.exit(opts.h ? 0 : 1)
-    }
-
-    def inst = new ClassNameTmpl(log: new CliLogger(useColor: !opts.C))
-    // inst.log.outfile = new java.io.File("/dev/null")
-    // inst.log.mklog()
-
-    return inst
+  void cleanup(int result) {
+    System.exit(result)
   }
 
-  private void execute() {
-    // ...
+  void die(String... msg) {
+    log.emerg(msg)
+    cleanup(1)
   }
 
-  private void die(String[] msg) {
-    this.log.emerg(msg)
-    System.exit(1)
+  void execute() {
+    cleanup()
   }
 }
 
 // use log4j if you need more support
 class CliLogger {
-  java.io.File outfile
-  boolean useColor
-
-  private def sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss:ZZZ")
+  File outfile
+  boolean useColor = false
 
   private enum LogLevel {
     EMERGENCY ("\u001B[1;31m", true),
@@ -74,13 +52,17 @@ class CliLogger {
     }
 
     private String color() { return color }
-    private String isError() { return error }
+    private String isError() { return isError }
   }
 
-  void mklog() {
-    assert this.outfile != null
+  void mklog(String path) {
+    if (path == null || path == "" || path == "/dev/null") {
+      return
+    }
+
+    this.outfile = new File(path)
     if (!this.outfile.exists()) {
-      this.outfile.mkdirs()
+      this.outfile.getParentFile().mkdirs()
       this.outfile.createNewFile()
     }
   }
@@ -90,21 +72,69 @@ class CliLogger {
     def name = level.name().padRight(9)
     def stream = level.isError() ? System.err : System.out
 
-    messages.each { ->
-      def stamp = this.sdf.format(new java.util.Date())
-      stream.println("[${stamp}] [${color}${name}\u001B[0m] ${it}")
+    messages.each { m ->
+      def stamp = java.time.OffsetDateTime.now().format(
+        java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
+      )
+      stream.println("${stamp}|${color}${name}\u001B[0m|${m}")
       if (this.outfile != null) {
-        this.outfile << "[${stamp}] [${name}] ${it}\n"
+        this.outfile << "${stamp}|${name}|${m}\n"
       }
     }
   }
 
-  void emerg(String[] msg)  { this.writer(LogLevel.EMERGENCY, msg) }
-  void alert(String[] msg)  { this.writer(LogLevel.ALERT, msg) }
-  void crit(String[] msg)   { this.writer(LogLevel.CRITICAL, msg) }
-  void err(String[] msg)    { this.writer(LogLevel.ERROR, msg) }
-  void warn(String[] msg)   { this.writer(LogLevel.WARNING, msg) }
-  void notice(String[] msg) { this.writer(LogLevel.NOTICE, msg) }
-  void info(String[] msg)   { this.writer(LogLevel.INFO, msg) }
-  void debug(String[] msg)  { this.writer(LogLevel.DEBUG, msg) }
+  void emerg(String... msg)  { this.writer(LogLevel.EMERGENCY, msg) }
+  void alert(String... msg)  { this.writer(LogLevel.ALERT, msg) }
+  void crit(String... msg)   { this.writer(LogLevel.CRITICAL, msg) }
+  void err(String... msg)    { this.writer(LogLevel.ERROR, msg) }
+  void warn(String... msg)   { this.writer(LogLevel.WARNING, msg) }
+  void notice(String... msg) { this.writer(LogLevel.NOTICE, msg) }
+  void info(String... msg)   { this.writer(LogLevel.INFO, msg) }
+  void debug(String... msg)  { this.writer(LogLevel.DEBUG, msg) }
 }
+
+@SourceURI
+final URI SOURCE_URI
+
+final String SCRIPT_PARENT = Paths.get(SOURCE_URI).getParent().toString()
+final String PATH_SEPARATOR = Paths.get(SOURCE_URI).toFile().separator
+final String SCRIPT_NAME = Paths.get(SOURCE_URI).getFileName().toString()
+final String SCRIPT_BASE = SCRIPT_NAME.take(SCRIPT_NAME.lastIndexOf("."))
+
+// helpers
+def logger = new CliLogger()
+def defaultLog = "${SCRIPT_PARENT}/logs/${SCRIPT_BASE}/${SCRIPT_BASE}.log"
+
+// CLI Def
+def cli = new CliBuilder(
+  usage: "${SCRIPT_NAME} [OPTIONS]",
+  header: "OPTIONS:"
+)
+
+// https://docs.groovy-lang.org/latest/html/gapi/groovy/cli/commons/CliBuilder.html
+cli.with {
+  h(longOpt: "help", "Show this help message")
+  C(longOpt: "cron", "Do not use colored status messages")
+  _(
+    longOpt: "log",
+    args: 1,
+    argName: "PATH",
+    "Write log to PATH (default: ${defaultLog})"
+  )
+}
+
+def opts = cli.parse(args)
+if (!opts || opts.h) {
+  System.out.println("Description\n")
+  cli.usage()
+  System.exit(opts.h ? 0 : 1)
+}
+
+logger.useColor = !opts.C
+logger.mklog(opts.log ?: defaultLog)
+
+def thisScript = new ThisScript(
+  log: logger
+)
+
+thisScript.execute()
