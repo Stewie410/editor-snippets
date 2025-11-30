@@ -1,48 +1,70 @@
 #!/usr/bin/env bash
 
-# level, message
-# level, <stdin
-log() {
-    set -- "${1}" "${2:-$(</dev/stdin)}" "${@:3}"
+cleanup() {
+    exec >&3-
+    exec >&4-
+}
 
-    local rgb level
+# level, message|<stdin
+log() {
+    if (( $# == 1 )); then
+        local -a largs
+        mapfile -t largs
+        set -- "${1}" "${largs[@]}"
+    fi
+
+    local rgb lvl
     case "${1,,}" in
-        emerg )     level="EMERGENCY"; rgb=$'\e[1;31mEMERGENCY\e[0m';;
-        alert )     level="ALERT    "; rgb=$'\e[1;36mALERT\e[0m    ';;
-        crit )      level="CRITICAL "; rgb=$'\e[1;33mCRITICAL\e[0m ';;
-        err )       level="ERROR    "; rgb=$'\e[0;31mERROR\e[0m    ';;
-        warn )      level="WARNING  "; rgb=$'\e[0;33mWARNING\e[0m  ';;
-        notice )    level="NOTICE   "; rgb=$'\e[1;37mNOTICE\e[0m   ';;
-        info )      level="INFO     "; rgb=$'\e[0;37mINFO\e[0m     ';;
-        debug )     level="DEBUG    "; rgb=$'\e[1;35mDEBUG\e[0m    ';;
+        emerg )     rgb='\e[1;31m'; lvl="EMERGENCY";;
+        alert )     rgb='\e[1;36m'; lvl="ALERT";;
+        crit )      rgb='\e[1;33m'; lvl="CRITICAL";;
+        err )       rgb='\e[0;31m'; lvl="ERROR";;
+        warn )      rgb='\e[0;33m'; lvl="WARNING";;
+        notice )    rgb='\e[0;32m'; lvl="NOTICE";;
+        info )      rgb='\e[1;37m'; lvl="INFO";;
+        debug )     rgb='\e[1;35m'; lvl="DEBUG";;
     esac
     shift
 
-    (( nocolor == 1 )) && rgb="${level}"
+    [[ -n "${nocolor}" ]] && unset rgb
 
     while (( $# > 0 )); do
-        printf '%(%FT%T%z)T|%s|%s: %s\n' -1 "${rgb}" "${FUNCNAME[1]}" "${1}"
+        printf '%(%FT%T)T|%b%-9s\e[0m|%s|%s\n' -1 \
+            "${rgb}" "${lvl}" "${FUNCNAME[1]}" "${1}"
         shift
-    done
+    done | tee >(
+        set --unbuffered $'s/\e[[][^a-zA-Z]*m//g' >> "${log:-/dev/null}"
+    )
+}
+
+die() {
+    log emerg "${@}" >&2
+    exit 1
+}
+
+cmd_exec() {
+    [[ -n "${debug}" ]] && log debug "RUN: ${*}" >&2
+    (exec "${@}") 1>&3 2>&4
 }
 
 show_help() {
     cat << EOF
 Description
 
-USAGE: ${0##*/} [OPTIONS]
+USAGE: ${me} [OPTIONS]
 
 OPTIONS:
     -h, --help      Show this help message
-        --no-color  Do not print colored text to terminal
+    -C, --cron      Do not print colored status messages
+    -L, --no-log    Do not write status message to logfile
 EOF
 }
 
 main() {
     local opts nocolor
     opts="$(getopt \
-        --options h \
-        --longoptions help,no-color \
+        --options hCL \
+        --longoptions help,cron,no-log \
         --name "${0##*/}" \
         -- "${@}" \
     )"
@@ -51,14 +73,22 @@ main() {
     while true; do
         case "${1}" in
             -h | --help )       show_help; return 0;;
-            --no-color )        nocolor="1";;
+            -C | --cron )       nocolor="1";;
+            -L | --no-log )     log="/dev/null";;
             -- )                shift; break;;
             * )                 break;;
         esac
         shift
     done
 
-    :
+    mkdir --parents "${log%/*}"
+    touch -a "${log}"
 }
+
+exec 3> >(log info >&1)
+exec 4> >(log err >&2)
+me="${0##*/}"
+log="${HOME}/.local/logs/${me%.*}/${me%.*}.log"
+trap cleanup EXIT
 
 main "${@}"

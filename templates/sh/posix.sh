@@ -1,16 +1,24 @@
 #!/bin/sh
 
+# shellcheck disable=SC2120
 log() {
-    printf '%s|%s\n' "$(date --iso-8601=sec)" "${1}" \
-        | tee --append "${log:-/dev/null}" \
-        | cut --fields="2-" --delimiter="|"
+    if [ $# -gt 0 ]; then
+        printf '%s\n' "${@}" | log
+        return 0
+    fi
+
+    while read -r REPLY; do
+        printf '%s|%s\n' "$(date --iso-8601='sec')" "${REPLY}" \
+            | tee -a "${log:-/dev/null}" \
+            | cut -f2- -d"|"
+    done
 }
 
 show_help() {
     cat << EOF
 Description
 
-USAGE: ${0##*/} [OPTIONS]
+USAGE: ${me} [OPTIONS]
 
 OPTIONS:
     -h      Show this help message
@@ -31,7 +39,8 @@ main() {
     touch -a "${log}"
 }
 
-log="${HOME}/.local/logs/$(basename "${0%.*}").log"
-here="$(cd "$(dirname "${@}")" && pwd)"
+me="${0##*/}"
+here="${0%/*}"
+log="${HOME}/.local/logs/${me%.*}/${me%.*}"
 
 main "${@}"

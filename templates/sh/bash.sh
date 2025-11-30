@@ -5,7 +5,7 @@ cleanup() {
 }
 
 log() {
-    printf '%s|%s|%s\n' "$(date --iso-8601=sec)" "${FUNCNAME[1]}" "${1}" \
+    printf '%(%FT%T)T|%s|%s\n' -1 "${FUNCNAME[1]}" "${1}" \
         | tee --append "${log:-/dev/null}" \
         | cut --fields="2-" --delimiter="|"
 }
@@ -44,7 +44,8 @@ main() {
     touch -a "${log}"
 }
 
-log="${HOME}/.local/logs/$(basename "${0%.*}").log"
+me="${0##*/}"
+log="${HOME}/.local/logs/${me%.*}/${me%.*}"
 trap cleanup EXIT
 
 main "${@}"

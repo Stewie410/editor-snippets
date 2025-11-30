@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 
-# level, message [...]
-# level, <stdin
+cleanup() {
+    exec >&6-
+    exec >&7-
+}
+
+# level, message[]|<stdin
 log() {
-    set -- "${1}" "${2:-$(</dev/stdin)}" "${@:3}"
+    if (( $# == 1 )); then
+        mapfile -t largs
+        set -- "${1}" "${largs[@]}"
+        unset largs
+    fi
+
     local level
     case "${1,,}" in
         emerg )     level="0";;
@@ -21,6 +30,16 @@ log() {
         printf '<%d>%s\n' "${level}" "${1}" >&4
         shift
     done
+}
+
+die() {
+    log emerg "${@}"
+    exit 1
+}
+
+cmd_exec() {
+    log debug ">> ${*}"
+    (exec "${@}") 1>&6 2>&7
 }
 
 show_help() {
@@ -41,7 +60,8 @@ main() {
     fi
 }
 
-exec 4>&2 2> >(while read -r REPLY; do printf '<3>%s\n' "${REPLY}" >&4; done)
-trap 'exec >&2-' EXIT
+exec 6> >(log info)
+exec 7> >(log err)
+trap cleanup EXIT
 
 main "${@}"
