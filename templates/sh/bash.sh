@@ -4,11 +4,19 @@ cleanup() {
     :
 }
 
-log() {
-    printf '%(%FT%T)T|%s|%s\n' -1 "${FUNCNAME[1]}" "${1}" \
-        | tee --append "${log:-/dev/null}" \
-        | cut --fields="2-" --delimiter="|"
-}
+# shellcheck disable=SC1091
+source "${BASH_LIB}/log.sh"
+
+# level, message...|<stdin
+log() { log.prety "${@}"; }
+
+# message...
+die() { log.pretty.die "${@}"; }
+
+# cmd, [args...]
+exec_log() { log.pretty.exec "${@}"; }
+exec_out() { log.pretty.exec.stdout "${@}"; }
+exec_err() { log.pretty.exec.stderr "${@}"; }
 
 show_help() {
     cat << EOF
@@ -18,14 +26,17 @@ USAGE: ${0##*/} [OPTIONS]
 
 OPTIONS:
     -h, --help      Show this help message
+    -C, --cron      Do not colorized logs to stdout
+        --log FILE  Write logs to FILE (default: ~/.local/logs/${me%.*}/${me%.*})
+        --debug     Write debugging logs
 EOF
 }
 
 main() {
     local opts
     opts="$(getopt \
-        --options h \
-        --longoptions help \
+        --options hC \
+        --longoptions help,cron,log:,debug \
         --name "${0##*/}" \
         -- "${@}" \
     )"
@@ -33,8 +44,11 @@ main() {
     eval set -- "${opts}"
     while true; do
         case "${1}" in
-            -h | --help )       show_help; return 0;;
-            -- )                shift; break;;
+            "-h" | "--help" )   show_help; return 0;;
+            "-C" | "--cron" )   nocolor="1";;
+                   "--log" )    log="${2}"; shift;;
+                   "--debug" )  debug="1";;
+            "--" )              shift; break;;
             * )                 break;;
         esac
         shift
@@ -44,6 +58,8 @@ main() {
     touch -a "${log}"
 }
 
+# shellcheck disable=SC2034
+declare nocolor debug
 me="${0##*/}"
 log="${HOME}/.local/logs/${me%.*}/${me%.*}"
 trap cleanup EXIT
