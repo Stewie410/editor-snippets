@@ -22,18 +22,18 @@ show_help() {
     cat << EOF
 Description
 
-USAGE: ${0##*/} [OPTIONS]
+USAGE: ${me} [OPTIONS]
 
 OPTIONS:
     -h, --help      Show this help message
-    -C, --cron      Do not colorized logs to stdout
+    -C, --cron      Do not print colored status messages
         --log FILE  Write logs to FILE (default: ~/.local/logs/${me%.*}/${me%.*})
         --debug     Write debugging logs
 EOF
 }
 
 main() {
-    local opts
+    local opts nocolor
     opts="$(getopt \
         --options hC \
         --longoptions help,cron,log:,debug \
@@ -61,7 +61,7 @@ main() {
 # shellcheck disable=SC2034
 declare nocolor debug
 me="${0##*/}"
-log="${HOME}/.local/logs/${me%.*}/${me%.*}"
+log="${HOME}/.local/logs/${me%.*}/${me%.*}.log"
 trap cleanup EXIT
 
 main "${@}"
