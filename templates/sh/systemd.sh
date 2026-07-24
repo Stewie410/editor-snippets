@@ -1,67 +1,68 @@
 #!/usr/bin/env bash
 
-cleanup() {
-    exec >&6-
-    exec >&7-
-}
+_cleanup() {
+    rv="$?"
 
-# level, message[]|<stdin
-log() {
-    if (( $# == 1 )); then
-        mapfile -t largs
-        set -- "${1}" "${largs[@]}"
-        unset largs
-    fi
+    log.cleanup
 
-    local level
-    case "${1,,}" in
-        emerg )     level="0";;
-        alert )     level="1";;
-        crit )      level="2";;
-        err )       level="3";;
-        warn )      level="4";;
-        notice )    level="5";;
-        info )      level="6";;
-        debug )     level="7";;
-    esac
-    shift
-
-    while (( $# > 0 )); do
-        printf '<%d>%s\n' "${level}" "${1}" >&4
-        shift
-    done
-}
-
-die() {
-    log emerg "${@}"
-    exit 1
-}
-
-cmd_exec() {
-    log debug ">> ${*}"
-    (exec "${@}") 1>&6 2>&7
+    return "${rv}"
 }
 
 show_help() {
     cat << EOF
-Description
+{{ DESCRIPTION }}
 
 USAGE: ${0##*/} [OPTIONS]
 
 OPTIONS:
     -h, --help      Show this help message
+        --debug     Include DEBUG in logging
 EOF
 }
 
 main() {
-    if [[ "${1}" == "-h" || "${1}" == "--help" ]]; then
-        show_help
-        return 0
-    fi
+    local opts
+    opts="$(
+        getopt \
+            --options h \
+            --longoptions help,debug \
+            --name "${0##*/}" \
+            -- "${@}"
+    )"
+
+    eval set -- "${opts}"
+    while true; do
+        case "${1}" in
+            "-h" | "--help")
+                show_help
+                return 0
+                ;;
+            "--debug")
+                debug="1"
+                ;;
+            "--")
+                shift
+                break
+                ;;
+            *)
+                break
+                ;;
+        esac
+        shift
+    done
+
+    :
 }
 
-exec 6> >(log info)
-exec 7> >(log err)
-trap cleanup EXIT
+me="${BASH_SOURCE[0]##*/}"
+# LOGGER_ERR=()
+# LOGGER_USE_COLOR="auto"
+# LOGGER_EXTENDED_FD="1"
+# LOGGER_DEBUG="1"
+
+# shellcheck disable=SC1091
+source "${BASH_LIB}/log/log.systemd.sh"
+
+trap _cleanup EXIT
 
 main "${@}"

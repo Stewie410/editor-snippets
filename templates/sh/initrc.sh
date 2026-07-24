@@ -2,12 +2,12 @@
 #
 # {{ SERVICE }}: {{ SUMMARY }}
 #
-# chkconfig:        - 98 02
-# description:      {{ DESCRIPTION }}
-# processname:      {{ SERVICE }}
-# Required-Start:   $network
-# Required-Stop:    $network
-# Provides:         {{ SERVICE }}
+# chkconfig:            - 98 02
+# description:          {{ DESCRIPTION }}
+# processname:          {{ SERVICE }}
+# Required-Start:       $network
+# Required-Stop:        $network
+# Provides:             {{ SERVICE }}
 
 ### BEGIN INIT INFO
 # Provides:             {{ SERVICE }}
@@ -52,11 +52,11 @@ status() {
 }
 
 case "${1}" in
-    "start" )       start;;
-    "stop" )        stop;;
-    "restart" )     restart;;
-    "status" )      status;;
-    * )
+    "start") start ;;
+    "stop") stop ;;
+    "restart") restart ;;
+    "status") status ;;
+    *)
         printf 'Usage: %s {start|stop|status|restart|try-restart|status|test}\n' \
             "${0}"
         exit 2
