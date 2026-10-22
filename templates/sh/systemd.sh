@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 _cleanup() {
-    rv="$?"
+	rv="$?"
 
-    log.cleanup
+	log.cleanup
 
-    return "${rv}"
+	return "${rv}"
 }
 
 show_help() {
-    cat << EOF
+	cat << EOF
 {{ DESCRIPTION }}
 
 USAGE: ${0##*/} [OPTIONS]
@@ -21,37 +21,37 @@ EOF
 }
 
 main() {
-    local opts
-    opts="$(
-        getopt \
-            --options h \
-            --longoptions help,debug \
-            --name "${0##*/}" \
-            -- "${@}"
-    )"
+	local opts
+	opts="$(
+		getopt \
+			--options h \
+			--longoptions help,debug \
+			--name "${0##*/}" \
+			-- "${@}"
+	)"
 
-    eval set -- "${opts}"
-    while true; do
-        case "${1}" in
-            "-h" | "--help")
-                show_help
-                return 0
-                ;;
-            "--debug")
-                debug="1"
-                ;;
-            "--")
-                shift
-                break
-                ;;
-            *)
-                break
-                ;;
-        esac
-        shift
-    done
+	eval set -- "${opts}"
+	while true; do
+		case "${1}" in
+		"-h" | "--help")
+			show_help
+			return 0
+			;;
+		"--debug")
+			debug="1"
+			;;
+		"--")
+			shift
+			break
+			;;
+		*)
+			break
+			;;
+		esac
+		shift
+	done
 
-    :
+	:
 }
 
 me="${BASH_SOURCE[0]##*/}"

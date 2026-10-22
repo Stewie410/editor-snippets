@@ -27,40 +27,40 @@ exec="/usr/bin/{{ SERVICE }}"
 
 # Require binary exists
 if ! [ -x "${exec}" ]; then
-    printf '%s not found or nto executable: %s\n' "${prog}" "${exec}" >&2
-    exit 5
+	printf '%s not found or nto executable: %s\n' "${prog}" "${exec}" >&2
+	exit 5
 fi
 
 start() {
-    # ...
-    :
+	# ...
+	:
 }
 
 stop() {
-    # ...
-    :
+	# ...
+	:
 }
 
 restart() {
-    stop
-    start
+	stop
+	start
 }
 
 status() {
-    # ...
-    :
+	# ...
+	:
 }
 
 case "${1}" in
-    "start") start ;;
-    "stop") stop ;;
-    "restart") restart ;;
-    "status") status ;;
-    *)
-        printf 'Usage: %s {start|stop|status|restart|try-restart|status|test}\n' \
-            "${0}"
-        exit 2
-        ;;
+"start") start ;;
+"stop") stop ;;
+"restart") restart ;;
+"status") status ;;
+*)
+	printf 'Usage: %s {start|stop|status|restart|try-restart|status|test}\n' \
+		"${0}"
+	exit 2
+	;;
 esac
 
 exit "$?"

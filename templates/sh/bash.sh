@@ -2,11 +2,11 @@
 # shellcheck disable=SC2034
 
 cleanup() {
-    log.cleanup
+	log.cleanup
 }
 
 show_help() {
-    cat << EOF
+	cat << EOF
 {{ DESCRIPTION }}
 
 USAGE: ${me} [OPTIONS]
@@ -22,58 +22,58 @@ EOF
 }
 
 main() {
-    local opts
-    opts="$(
-        getopt \
-            --options h \
-            --longoptions help,color:,log:,debug \
-            --name "${0##*/}" \
-            -- "${@}"
-    )"
+	local opts
+	opts="$(
+		getopt \
+			--options h \
+			--longoptions help,color:,log:,debug \
+			--name "${0##*/}" \
+			-- "${@}"
+	)"
 
-    eval set -- "${opts}"
-    while true; do
-        case "${1}" in
-            "-h" | "--help")
-                show_help
-                return 0
-                ;;
-            "--color")
-                case "${2,,}" in
-                    "always" | "yes" | "never" | "no" | "auto")
-                        LOGGER_USE_COLOR="${2,,}"
-                        ;;
-                    *)
-                        printf 'Skipping invalid --color choice: %s\n' \
-                            "${2,,}" >&2
-                        ;;
-                esac
-                shift
-                ;;
-            "--log")
-                if ! LOGGER_LOGFILE="$(realpath --canonicalize-missing "${2}")"; then
-                    printf 'Cannot normalize --log: "%s"\n' "${2}" >&2
-                    return 1
-                fi
-                shift
-                ;;
-            "--debug")
-                LOGGER_DEBUG="1"
-                ;;
-            "--")
-                shift
-                break
-                ;;
-            *)
-                break
-                ;;
-        esac
-        shift
-    done
+	eval set -- "${opts}"
+	while true; do
+		case "${1}" in
+		"-h" | "--help")
+			show_help
+			return 0
+			;;
+		"--color")
+			case "${2,,}" in
+			"always" | "yes" | "never" | "no" | "auto")
+				LOGGER_USE_COLOR="${2,,}"
+				;;
+			*)
+				printf 'Skipping invalid --color choice: %s\n' \
+					"${2,,}" >&2
+				;;
+			esac
+			shift
+			;;
+		"--log")
+			if ! LOGGER_LOGFILE="$(realpath --canonicalize-missing "${2}")"; then
+				printf 'Cannot normalize --log: "%s"\n' "${2}" >&2
+				return 1
+			fi
+			shift
+			;;
+		"--debug")
+			LOGGER_DEBUG="1"
+			;;
+		"--")
+			shift
+			break
+			;;
+		*)
+			break
+			;;
+		esac
+		shift
+	done
 
-    log.init || return 1
+	log.init || return 1
 
-    :
+	:
 }
 
 # here="${BASH_SOURCE[0]%/*}"
