@@ -166,25 +166,25 @@
     "shdoc-name": {
         "prefix": "@n",
         "body": [
-            "@name ${0:filename}"
+            "@name $0"
         ]
     },
     "shdoc-file": {
         "prefix": "@f",
         "body": [
-            "@file ${0:filename}"
+            "@file $0"
         ]
     },
     "shdoc-brief": {
         "prefix": "@b",
         "body": [
-            "@brief ${0:summary}"
+            "@brief $0"
         ]
     },
     "shdoc-description": {
         "prefix": "@d",
         "body": [
-            "@description ${0:desc}"
+            "@description $0"
         ]
     },
     "shdoc-deprecated": {
@@ -196,19 +196,19 @@
     "shdoc-section": {
         "prefix": "@g",
         "body": [
-            "@section ${0:name}"
+            "@section $0"
         ]
     },
     "shdoc-opt": {
         "prefix": "@o",
         "body": [
-            "@option -${1:short} <${2:value}> | --${3:long} <${4:value}> ${0:desc}"
+            "@option -${1:short} <${2:value}> | --${3:long} <${4:value}> $0"
         ]
     },
     "shdoc-arg": {
         "prefix": "@a",
         "body": [
-            "@arg \\$${1:number} ${2:type} ${0:desc}"
+            "@arg \\$${1:number} ${2:type} $0"
         ]
     },
     "shdoc-noargs": {
@@ -220,31 +220,31 @@
     "shdoc-set": {
         "prefix": "@s",
         "body": [
-            "@set ${1:VARNAME} ${2:type} ${0:desc}"
+            "@set ${1:VARNAME} ${2:type} $0"
         ]
     },
     "shdoc-exit": {
         "prefix": "@r",
         "body": [
-            "@exitcode ${1:number} ${0:desc}"
+            "@exitcode ${1:number} $0"
         ]
     },
     "shdoc-stdin": {
         "prefix": "@0",
         "body": [
-            "@stdin ${0:desc}"
+            "@stdin $0"
         ]
     },
     "shdoc-stdout": {
         "prefix": "@1",
         "body": [
-            "@stdout ${0:desc}"
+            "@stdout $0"
         ]
     },
     "shdoc-stderr": {
         "prefix": "@2",
         "body": [
-            "@stderr ${0:desc}"
+            "@stderr $0"
         ]
     },
     "shdoc-internal": {
