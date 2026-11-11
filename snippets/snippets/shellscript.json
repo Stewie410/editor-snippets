@@ -162,5 +162,95 @@
             "\t$0",
             "done"
         ]
+    },
+    "shdoc-name": {
+        "prefix": "@n",
+        "body": [
+            "@name ${0:filename}"
+        ]
+    },
+    "shdoc-file": {
+        "prefix": "@f",
+        "body": [
+            "@file ${0:filename}"
+        ]
+    },
+    "shdoc-brief": {
+        "prefix": "@b",
+        "body": [
+            "@brief ${0:summary}"
+        ]
+    },
+    "shdoc-description": {
+        "prefix": "@d",
+        "body": [
+            "@description ${0:desc}"
+        ]
+    },
+    "shdoc-deprecated": {
+        "prefix": "@D",
+        "body": [
+            "@deprecated"
+        ]
+    },
+    "shdoc-section": {
+        "prefix": "@g",
+        "body": [
+            "@section ${0:name}"
+        ]
+    },
+    "shdoc-opt": {
+        "prefix": "@o",
+        "body": [
+            "@option -${1:short} <${2:value}> | --${3:long} <${4:value}> ${0:desc}"
+        ]
+    },
+    "shdoc-arg": {
+        "prefix": "@a",
+        "body": [
+            "@arg \\$${1:number} ${2:type} ${0:desc}"
+        ]
+    },
+    "shdoc-noargs": {
+        "prefix": "@A",
+        "body": [
+            "@noargs"
+        ]
+    },
+    "shdoc-set": {
+        "prefix": "@s",
+        "body": [
+            "@set ${1:VARNAME} ${2:type} ${0:desc}"
+        ]
+    },
+    "shdoc-exit": {
+        "prefix": "@r",
+        "body": [
+            "@exitcode ${1:number} ${0:desc}"
+        ]
+    },
+    "shdoc-stdin": {
+        "prefix": "@0",
+        "body": [
+            "@stdin ${0:desc}"
+        ]
+    },
+    "shdoc-stdout": {
+        "prefix": "@1",
+        "body": [
+            "@stdout ${0:desc}"
+        ]
+    },
+    "shdoc-stderr": {
+        "prefix": "@2",
+        "body": [
+            "@stderr ${0:desc}"
+        ]
+    },
+    "shdoc-internal": {
+        "prefix": "@i",
+        "body": [
+            "@internal"
+        ]
     }
 }
